@@ -1,0 +1,44 @@
+# coding: utf-8
+
+# flake8: noqa
+from __future__ import absolute_import
+# import models into model package
+from swagger_server.models.artist_profile import ArtistProfile
+from swagger_server.models.artist_profile_update import ArtistProfileUpdate
+from swagger_server.models.auth_refresh_body import AuthRefreshBody
+from swagger_server.models.auth_response import AuthResponse
+from swagger_server.models.consents import Consents
+from swagger_server.models.consents_update import ConsentsUpdate
+from swagger_server.models.inline_response200 import InlineResponse200
+from swagger_server.models.login_request import LoginRequest
+from swagger_server.models.me_follows_body import MeFollowsBody
+from swagger_server.models.me_password_body import MePasswordBody
+from swagger_server.models.paged_playlists import PagedPlaylists
+from swagger_server.models.paged_reviews import PagedReviews
+from swagger_server.models.paged_users import PagedUsers
+from swagger_server.models.playlist import Playlist
+from swagger_server.models.playlist_create import PlaylistCreate
+from swagger_server.models.playlist_id_items_body import PlaylistIdItemsBody
+from swagger_server.models.playlist_id_items_body1 import PlaylistIdItemsBody1
+from swagger_server.models.playlist_item import PlaylistItem
+from swagger_server.models.playlist_share import PlaylistShare
+from swagger_server.models.playlist_update import PlaylistUpdate
+from swagger_server.models.playlist_visibility import PlaylistVisibility
+from swagger_server.models.register_request import RegisterRequest
+from swagger_server.models.reset_confirm_body import ResetConfirmBody
+from swagger_server.models.reset_request_body import ResetRequestBody
+from swagger_server.models.review import Review
+from swagger_server.models.review_create import ReviewCreate
+from swagger_server.models.review_status import ReviewStatus
+from swagger_server.models.review_update import ReviewUpdate
+from swagger_server.models.reviews_review_id_body import ReviewsReviewIdBody
+from swagger_server.models.role import Role
+from swagger_server.models.session import Session
+from swagger_server.models.token_pair import TokenPair
+from swagger_server.models.user_admin_update import UserAdminUpdate
+from swagger_server.models.user_id_roles_body import UserIdRolesBody
+from swagger_server.models.user_private import UserPrivate
+from swagger_server.models.user_public import UserPublic
+from swagger_server.models.user_update import UserUpdate
+from swagger_server.models.verifyemail_confirm_body import VerifyemailConfirmBody
+from swagger_server.models.verifyemail_request_body import VerifyemailRequestBody

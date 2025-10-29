@@ -1,0 +1,1691 @@
+openapi: 3.0.4
+info:
+  title: Usuarios y Autorización
+  description: ""
+  version: 1.0.0
+servers:
+- url: https://virtserver.swaggerhub.com/universidadpolitcnic-44f/Usuarios_y_autorizacion/1.0.0
+  description: SwaggerHub API Auto Mocking
+- url: https://api.undersound.test/v1
+tags:
+- name: Auth
+- name: Me
+- name: Users (admin)
+paths:
+  /me/sessions:
+    get:
+      tags:
+      - Me
+      summary: Lista dispositivos/sesiones activas
+      operationId: me_sessions_get
+      responses:
+        "200":
+          description: Sesiones activas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Session"
+                x-content-type: application/json
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /me/sessions/{sessionId}:
+    delete:
+      tags:
+      - Me
+      summary: Cierra una sesión concreta
+      operationId: me_sessions_session_id_delete
+      parameters:
+      - name: sessionId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Sesión cerrada
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /me/consents:
+    get:
+      tags:
+      - Me
+      summary: Ver consentimientos de privacidad y marketing
+      operationId: me_consents_get
+      responses:
+        "200":
+          description: Consentimientos actuales
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Consents"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+    patch:
+      tags:
+      - Me
+      summary: Actualizar consentimientos
+      operationId: me_consents_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConsentsUpdate"
+        required: true
+      responses:
+        "200":
+          description: Consentimientos actualizados
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Consents"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /me/follows:
+    get:
+      tags:
+      - Me
+      summary: Listar a quién sigo
+      operationId: me_follows_get
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 1
+          type: integer
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          default: 20
+      responses:
+        "200":
+          description: Lista de usuarios seguidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedUsers"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+    post:
+      tags:
+      - Me
+      summary: Seguir a un usuario
+      operationId: me_follows_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/me_follows_body"
+        required: true
+      responses:
+        "201":
+          description: Siguiendo
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /me/follows/{userId}:
+    delete:
+      tags:
+      - Me
+      summary: Dejar de seguir a un usuario
+      operationId: me_follows_user_id_delete
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Dejado de seguir
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /users/{userId}/followers:
+    get:
+      tags:
+      - Users (admin)
+      summary: Listar seguidores de un usuario (admin o dueño)
+      operationId: users_user_id_followers_get
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 1
+          type: integer
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          default: 20
+      responses:
+        "200":
+          description: Seguidores
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedUsers"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+  /me/playlists:
+    get:
+      tags:
+      - Me
+      summary: Listar mis playlists
+      operationId: me_playlists_get
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 1
+          type: integer
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          default: 20
+      responses:
+        "200":
+          description: Playlists propias
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedPlaylists"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+    post:
+      tags:
+      - Me
+      summary: Crear playlist
+      operationId: me_playlists_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlaylistCreate"
+        required: true
+      responses:
+        "201":
+          description: Playlist creada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Playlist"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /me/playlists/{playlistId}:
+    get:
+      tags:
+      - Me
+      summary: Ver playlist propia
+      operationId: me_playlists_playlist_id_get
+      parameters:
+      - name: playlistId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Playlist
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Playlist"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+    delete:
+      tags:
+      - Me
+      summary: Borrar playlist
+      operationId: me_playlists_playlist_id_delete
+      parameters:
+      - name: playlistId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Borrada
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+    patch:
+      tags:
+      - Me
+      summary: Editar metadatos de playlist
+      operationId: me_playlists_playlist_id_patch
+      parameters:
+      - name: playlistId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlaylistUpdate"
+        required: true
+      responses:
+        "200":
+          description: Playlist actualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Playlist"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /me/playlists/{playlistId}/items:
+    get:
+      tags:
+      - Me
+      summary: Listar canciones de la playlist
+      operationId: me_playlists_playlist_id_items_get
+      parameters:
+      - name: playlistId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ítems
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlaylistItem"
+                x-content-type: application/json
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+    put:
+      tags:
+      - Me
+      summary: Reordenar ítems de la playlist
+      operationId: me_playlists_playlist_id_items_put
+      parameters:
+      - name: playlistId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/playlistId_items_body"
+        required: true
+      responses:
+        "200":
+          description: Orden actualizado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PlaylistItem"
+                x-content-type: application/json
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+    post:
+      tags:
+      - Me
+      summary: Añadir canción a la playlist
+      operationId: me_playlists_playlist_id_items_post
+      parameters:
+      - name: playlistId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/playlistId_items_body_1"
+        required: true
+      responses:
+        "201":
+          description: Añadido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlaylistItem"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /me/playlists/{playlistId}/items/{itemId}:
+    delete:
+      tags:
+      - Me
+      summary: Quitar ítem de la playlist
+      operationId: me_playlists_playlist_id_items_item_id_delete
+      parameters:
+      - name: playlistId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: itemId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Eliminado
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /me/playlists/{playlistId}/share:
+    post:
+      tags:
+      - Me
+      summary: Configurar compartición/visibilidad de playlist
+      operationId: me_playlists_playlist_id_share_post
+      parameters:
+      - name: playlistId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlaylistShare"
+        required: true
+      responses:
+        "200":
+          description: Visibilidad/compartición actualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Playlist"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /me/reviews:
+    get:
+      tags:
+      - Me
+      summary: Mis reseñas de compras
+      operationId: me_reviews_get
+      parameters:
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 1
+          type: integer
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          default: 20
+      responses:
+        "200":
+          description: Reseñas propias
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedReviews"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+    post:
+      tags:
+      - Me
+      summary: Crear reseña (solo artículos comprados)
+      operationId: me_reviews_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewCreate"
+        required: true
+      responses:
+        "201":
+          description: Reseña creada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /me/reviews/{reviewId}:
+    delete:
+      tags:
+      - Me
+      summary: Borrar reseña propia
+      operationId: me_reviews_review_id_delete
+      parameters:
+      - name: reviewId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "204":
+          description: Eliminada
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+    patch:
+      tags:
+      - Me
+      summary: Editar reseña propia
+      operationId: me_reviews_review_id_patch
+      parameters:
+      - name: reviewId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewUpdate"
+        required: true
+      responses:
+        "200":
+          description: Reseña actualizada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /me/artist:
+    get:
+      tags:
+      - Me
+      summary: Ver mi perfil de artista
+      operationId: me_artist_get
+      responses:
+        "200":
+          description: Perfil de artista
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtistProfile"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+    patch:
+      tags:
+      - Me
+      summary: Actualizar perfil de artista (solo role=artist)
+      operationId: me_artist_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ArtistProfileUpdate"
+        required: true
+      responses:
+        "200":
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtistProfile"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /admin/reviews:
+    get:
+      tags:
+      - Users (admin)
+      summary: Moderar reseñas (listar/filtrar)
+      operationId: admin_reviews_get
+      parameters:
+      - name: userId
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: productId
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+          enum:
+          - visible
+          - hidden
+          - flagged
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 1
+          type: integer
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          default: 20
+      responses:
+        "200":
+          description: Reseñas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedReviews"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+  /admin/reviews/{reviewId}:
+    patch:
+      tags:
+      - Users (admin)
+      summary: Moderar estado de una reseña
+      operationId: admin_reviews_review_id_patch
+      parameters:
+      - name: reviewId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/reviews_reviewId_body"
+        required: true
+      responses:
+        "200":
+          description: Reseña moderada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+  /auth/register:
+    post:
+      tags:
+      - Auth
+      summary: Alta de cuenta
+      operationId: auth_register_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "201":
+          description: Usuario creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Datos inválidos
+      x-openapi-router-controller: swagger_server.controllers.auth_controller
+  /auth/login:
+    post:
+      tags:
+      - Auth
+      summary: Inicia sesión
+      operationId: auth_login_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+        required: true
+      responses:
+        "200":
+          description: Sesión iniciada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Credenciales inválidas o MFA requerida
+      x-openapi-router-controller: swagger_server.controllers.auth_controller
+  /auth/refresh:
+    post:
+      tags:
+      - Auth
+      summary: Renueva access token con refresh token
+      operationId: auth_refresh_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/auth_refresh_body"
+        required: true
+      responses:
+        "200":
+          description: Token renovado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenPair"
+        "401":
+          description: Refresh token inválido
+      x-openapi-router-controller: swagger_server.controllers.auth_controller
+  /auth/logout:
+    post:
+      tags:
+      - Auth
+      summary: Cierra sesión actual
+      operationId: auth_logout_post
+      responses:
+        "204":
+          description: Sesión cerrada
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.auth_controller
+  /auth/verify-email/request:
+    post:
+      tags:
+      - Auth
+      summary: Envía email de verificación
+      operationId: auth_verify_email_request_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/verifyemail_request_body"
+        required: true
+      responses:
+        "204":
+          description: Enviado si el email existe
+      x-openapi-router-controller: swagger_server.controllers.auth_controller
+  /auth/verify-email/confirm:
+    post:
+      tags:
+      - Auth
+      summary: Confirma verificación de email
+      operationId: auth_verify_email_confirm_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/verifyemail_confirm_body"
+        required: true
+      responses:
+        "204":
+          description: Email verificado
+      x-openapi-router-controller: swagger_server.controllers.auth_controller
+  /auth/password/reset/request:
+    post:
+      tags:
+      - Auth
+      summary: Solicita reset de contraseña
+      operationId: auth_password_reset_request_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/reset_request_body"
+        required: true
+      responses:
+        "204":
+          description: Enviado si el email existe
+      x-openapi-router-controller: swagger_server.controllers.auth_controller
+  /auth/password/reset/confirm:
+    post:
+      tags:
+      - Auth
+      summary: Confirma nuevo password
+      operationId: auth_password_reset_confirm_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/reset_confirm_body"
+        required: true
+      responses:
+        "204":
+          description: Contraseña actualizada
+      x-openapi-router-controller: swagger_server.controllers.auth_controller
+  /me:
+    get:
+      tags:
+      - Me
+      summary: Perfil del usuario autenticado
+      operationId: me_get
+      responses:
+        "200":
+          description: Perfil propio
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPrivate"
+        "401":
+          description: No autenticado
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+    patch:
+      tags:
+      - Me
+      summary: Actualiza perfil propio
+      operationId: me_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+        required: true
+      responses:
+        "200":
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPrivate"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /me/password:
+    patch:
+      tags:
+      - Me
+      summary: Cambia contraseña autenticado
+      operationId: me_password_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/me_password_body"
+        required: true
+      responses:
+        "204":
+          description: Contraseña actualizada
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+  /users:
+    get:
+      tags:
+      - Users (admin)
+      summary: Listado de usuarios
+      operationId: users_get
+      parameters:
+      - name: q
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: role
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          $ref: "#/components/schemas/Role"
+      - name: page
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          minimum: 1
+          type: integer
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          maximum: 100
+          minimum: 1
+          type: integer
+          default: 20
+      responses:
+        "200":
+          description: Página de usuarios
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/inline_response_200"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+  /users/{userId}:
+    get:
+      tags:
+      - Users (admin)
+      summary: Detalle de usuario
+      operationId: users_user_id_get
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Usuario
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPublic"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+    patch:
+      tags:
+      - Users (admin)
+      summary: Edita usuario
+      operationId: users_user_id_patch
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserAdminUpdate"
+        required: true
+      responses:
+        "200":
+          description: Usuario actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPublic"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+  /users/{userId}/roles:
+    patch:
+      tags:
+      - Users (admin)
+      summary: Asigna/quita roles
+      operationId: users_user_id_roles_patch
+      parameters:
+      - name: userId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/userId_roles_body"
+        required: true
+      responses:
+        "204":
+          description: Roles actualizados
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+components:
+  schemas:
+    Role:
+      type: string
+      enum:
+      - listener
+      - artist
+      - admin
+    RegisterRequest:
+      required:
+      - email
+      - password
+      - role
+      - username
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          minLength: 8
+          type: string
+        username:
+          maxLength: 32
+          minLength: 3
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
+    LoginRequest:
+      required:
+      - emailOrUsername
+      - password
+      type: object
+      properties:
+        emailOrUsername:
+          type: string
+        password:
+          type: string
+        mfaCode:
+          type: string
+          description: Código TOTP si MFA está activado
+    TokenPair:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+      example:
+        accessToken: accessToken
+        refreshToken: refreshToken
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/UserPrivate"
+        tokens:
+          $ref: "#/components/schemas/TokenPair"
+      example:
+        tokens:
+          accessToken: accessToken
+          refreshToken: refreshToken
+        user: ""
+    UserPublic:
+      type: object
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+        role:
+          $ref: "#/components/schemas/Role"
+        avatarUrl:
+          type: string
+          format: uri
+        bio:
+          type: string
+      example:
+        role: listener
+        avatarUrl: http://example.com/aeiou
+        bio: bio
+        id: id
+        username: username
+    UserPrivate:
+      allOf:
+      - $ref: "#/components/schemas/UserPublic"
+      - type: object
+        properties:
+          email:
+            type: string
+            format: email
+          emailVerified:
+            type: boolean
+    UserUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+        bio:
+          type: string
+    UserAdminUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          $ref: "#/components/schemas/Role"
+        disabled:
+          type: boolean
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+        device:
+          type: string
+        userAgent:
+          type: string
+        ip:
+          type: string
+          format: ipv4
+        createdAt:
+          type: string
+          format: date-time
+        lastSeenAt:
+          type: string
+          format: date-time
+        current:
+          type: boolean
+      example:
+        lastSeenAt: 2000-01-23T04:56:07.000+00:00
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        current: true
+        ip: ip
+        userAgent: userAgent
+        id: id
+        device: device
+    Consents:
+      type: object
+      properties:
+        emailMarketing:
+          type: boolean
+        personalizedRecommendations:
+          type: boolean
+        dataProcessingAccepted:
+          type: boolean
+      example:
+        personalizedRecommendations: true
+        emailMarketing: true
+        dataProcessingAccepted: true
+    ConsentsUpdate:
+      allOf:
+      - $ref: "#/components/schemas/Consents"
+    PagedUsers:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserPublic"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+      example:
+        total: 1
+        pageSize: 6
+        page: 0
+        items:
+        - role: listener
+          avatarUrl: http://example.com/aeiou
+          bio: bio
+          id: id
+          username: username
+        - role: listener
+          avatarUrl: http://example.com/aeiou
+          bio: bio
+          id: id
+          username: username
+    PlaylistVisibility:
+      type: string
+      enum:
+      - private
+      - unlisted
+      - public
+    Playlist:
+      type: object
+      properties:
+        id:
+          type: string
+        ownerId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        visibility:
+          $ref: "#/components/schemas/PlaylistVisibility"
+        shareUrl:
+          type: string
+          format: uri
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PlaylistItem"
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        visibility: private
+        description: description
+        shareUrl: http://example.com/aeiou
+        id: id
+        ownerId: ownerId
+        title: title
+        items:
+        - addedAt: 2000-01-23T04:56:07.000+00:00
+          trackId: trackId
+          id: id
+          position: 0
+        - addedAt: 2000-01-23T04:56:07.000+00:00
+          trackId: trackId
+          id: id
+          position: 0
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+    PlaylistCreate:
+      required:
+      - title
+      type: object
+      properties:
+        title:
+          maxLength: 120
+          minLength: 1
+          type: string
+        description:
+          maxLength: 500
+          type: string
+        visibility:
+          $ref: "#/components/schemas/PlaylistVisibility"
+    PlaylistUpdate:
+      type: object
+      properties:
+        title:
+          maxLength: 120
+          minLength: 1
+          type: string
+        description:
+          maxLength: 500
+          type: string
+        visibility:
+          $ref: "#/components/schemas/PlaylistVisibility"
+    PlaylistShare:
+      type: object
+      properties:
+        visibility:
+          $ref: "#/components/schemas/PlaylistVisibility"
+    PlaylistItem:
+      type: object
+      properties:
+        id:
+          type: string
+        trackId:
+          type: string
+        position:
+          minimum: 0
+          type: integer
+        addedAt:
+          type: string
+          format: date-time
+      example:
+        addedAt: 2000-01-23T04:56:07.000+00:00
+        trackId: trackId
+        id: id
+        position: 0
+    PagedPlaylists:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Playlist"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+      example:
+        total: 5
+        pageSize: 1
+        page: 6
+        items:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          visibility: private
+          description: description
+          shareUrl: http://example.com/aeiou
+          id: id
+          ownerId: ownerId
+          title: title
+          items:
+          - addedAt: 2000-01-23T04:56:07.000+00:00
+            trackId: trackId
+            id: id
+            position: 0
+          - addedAt: 2000-01-23T04:56:07.000+00:00
+            trackId: trackId
+            id: id
+            position: 0
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          visibility: private
+          description: description
+          shareUrl: http://example.com/aeiou
+          id: id
+          ownerId: ownerId
+          title: title
+          items:
+          - addedAt: 2000-01-23T04:56:07.000+00:00
+            trackId: trackId
+            id: id
+            position: 0
+          - addedAt: 2000-01-23T04:56:07.000+00:00
+            trackId: trackId
+            id: id
+            position: 0
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+    ReviewStatus:
+      type: string
+      enum:
+      - visible
+      - hidden
+      - flagged
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        productId:
+          type: string
+          description: Merch u otros artículos
+        orderId:
+          type: string
+          description: Pedido asociado que habilita la reseña
+        rating:
+          maximum: 5
+          minimum: 1
+          type: integer
+        title:
+          maxLength: 120
+          type: string
+        body:
+          maxLength: 2000
+          type: string
+        status:
+          $ref: "#/components/schemas/ReviewStatus"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        productId: productId
+        orderId: orderId
+        rating: 1
+        id: id
+        title: title
+        body: body
+        userId: userId
+        status: visible
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+    ReviewCreate:
+      required:
+      - orderId
+      - productId
+      - rating
+      type: object
+      properties:
+        productId:
+          type: string
+        orderId:
+          type: string
+        rating:
+          maximum: 5
+          minimum: 1
+          type: integer
+        title:
+          maxLength: 120
+          type: string
+        body:
+          maxLength: 2000
+          type: string
+    ReviewUpdate:
+      type: object
+      properties:
+        rating:
+          maximum: 5
+          minimum: 1
+          type: integer
+        title:
+          maxLength: 120
+          type: string
+        body:
+          maxLength: 2000
+          type: string
+    PagedReviews:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Review"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+      example:
+        total: 5
+        pageSize: 1
+        page: 6
+        items:
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          productId: productId
+          orderId: orderId
+          rating: 1
+          id: id
+          title: title
+          body: body
+          userId: userId
+          status: visible
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+        - createdAt: 2000-01-23T04:56:07.000+00:00
+          productId: productId
+          orderId: orderId
+          rating: 1
+          id: id
+          title: title
+          body: body
+          userId: userId
+          status: visible
+          updatedAt: 2000-01-23T04:56:07.000+00:00
+    ArtistProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        stageName:
+          type: string
+        bio:
+          maxLength: 1000
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+        bannerUrl:
+          type: string
+          format: uri
+        socials:
+          type: object
+          additionalProperties:
+            type: string
+        verified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        stageName: stageName
+        avatarUrl: http://example.com/aeiou
+        bannerUrl: http://example.com/aeiou
+        verified: true
+        bio: bio
+        id: id
+        socials:
+          key: socials
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+    ArtistProfileUpdate:
+      type: object
+      properties:
+        stageName:
+          type: string
+        bio:
+          maxLength: 1000
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+        bannerUrl:
+          type: string
+          format: uri
+        socials:
+          type: object
+          additionalProperties:
+            type: string
+    me_follows_body:
+      required:
+      - userId
+      type: object
+      properties:
+        userId:
+          type: string
+    playlistId_items_body:
+      required:
+      - order
+      type: object
+      properties:
+        order:
+          type: array
+          items:
+            type: string
+            description: IDs de playlistItem en el nuevo orden
+    playlistId_items_body_1:
+      required:
+      - trackId
+      type: object
+      properties:
+        trackId:
+          type: string
+        position:
+          minimum: 0
+          type: integer
+          description: Posición opcional
+    reviews_reviewId_body:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+          - visible
+          - hidden
+          - flagged
+    auth_refresh_body:
+      required:
+      - refreshToken
+      type: object
+      properties:
+        refreshToken:
+          type: string
+    verifyemail_request_body:
+      required:
+      - email
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+    verifyemail_confirm_body:
+      required:
+      - token
+      type: object
+      properties:
+        token:
+          type: string
+    reset_request_body:
+      required:
+      - email
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+    reset_confirm_body:
+      required:
+      - newPassword
+      - token
+      type: object
+      properties:
+        token:
+          type: string
+        newPassword:
+          minLength: 8
+          type: string
+    me_password_body:
+      required:
+      - currentPassword
+      - newPassword
+      type: object
+      properties:
+        currentPassword:
+          type: string
+        newPassword:
+          minLength: 8
+          type: string
+    inline_response_200:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserPublic"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+      example:
+        total: 1
+        pageSize: 6
+        page: 0
+        items:
+        - role: listener
+          avatarUrl: http://example.com/aeiou
+          bio: bio
+          id: id
+          username: username
+        - role: listener
+          avatarUrl: http://example.com/aeiou
+          bio: bio
+          id: id
+          username: username
+    userId_roles_body:
+      required:
+      - roles
+      type: object
+      properties:
+        roles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Role"
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: swagger_server.controllers.authorization_controller.check_bearerAuth
+
