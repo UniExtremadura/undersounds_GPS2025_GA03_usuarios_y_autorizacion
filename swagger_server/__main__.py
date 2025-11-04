@@ -24,7 +24,7 @@ from swagger_server import models_db  # <-- aquí están tus modelos y su Base
 
 def create_app() -> connexion.App:
     settings = get_settings()
-    app = connexion.App(__name__, specification_dir="./swagger/")
+    app = connexion.App(__name__, specification_dir="./swagger/", options={"swagger_ui": True})
     app.app.json_encoder = encoder.JSONEncoder  # aviso deprecado, ok en dev
 
     # Engine + sesión
