@@ -144,20 +144,38 @@ def auth_register_post(body):  # noqa: E501
     """Alta de cuenta"""
 
     data = _parse_json(RegisterRequest, {})
-    name = (data.get("name") or "").strip()
+
+    name = (data.get("name") or data.get("username") or "").strip()
     email = _normalize_email(data.get("email"))
     password = data.get("password")
-    role_value = data.get("role")
 
-    if not name or not email or not password or not role_value:
+    # Normaliza y mapea el rol entrante (acepta inglés o español)
+    role_value_in = (data.get("role") or "").strip().lower()
+    ROLE_MAP = {
+        "listener": "oyente",
+        "artist": "artista",
+        "oyente": "oyente",
+        "artista": "artista",
+    }
+    role_mapped = ROLE_MAP.get(role_value_in)
+
+    # Validaciones
+    if not name or not email or not password or not role_value_in:
         return {"mensaje": "Todos los campos son obligatorios"}, 400
+
     if len(password) < 8:
         return {"mensaje": "La contraseña debe tener al menos 8 caracteres"}, 400
+
+    if role_mapped is None:
+        return {"mensaje": "Rol inválido"}, 400
+
+    # Valida contra tu enum interno
     try:
-        role = RoleEnum(role_value)
+        role = RoleEnum(role_mapped)
     except ValueError:
         return {"mensaje": "Rol inválido"}, 400
 
+    # Lógica de creación
     session = get_session()
     existing = session.execute(select(User).where(User.email == email)).scalar_one_or_none()
     if existing:
@@ -169,16 +187,19 @@ def auth_register_post(body):  # noqa: E501
         password_hash=hash_password(password),
         role=role,
     )
+
     session.add(user)
     try:
         session.commit()
     except IntegrityError:
         session.rollback()
         return {"mensaje": "Email ya registrado"}, 400
+
     session.refresh(user)
 
     tokens = issue_tokens(user.id)
     return _auth_response(user, tokens), 201
+
 
 
 def auth_verify_email_confirm_post(body):  # noqa: E501
