@@ -203,7 +203,7 @@ paths:
                 $ref: "#/components/schemas/PagedUsers"
       security:
       - bearerAuth: []
-      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+      x-openapi-router-controller: swagger_server.controllers.users_admin_controller
   /me/playlists:
     get:
       tags:
@@ -681,7 +681,7 @@ paths:
                 $ref: "#/components/schemas/PagedReviews"
       security:
       - bearerAuth: []
-      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+      x-openapi-router-controller: swagger_server.controllers.users_admin_controller
   /admin/reviews/{reviewId}:
     patch:
       tags:
@@ -711,7 +711,7 @@ paths:
                 $ref: "#/components/schemas/Review"
       security:
       - bearerAuth: []
-      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+      x-openapi-router-controller: swagger_server.controllers.users_admin_controller
   /auth/register:
     post:
       tags:
@@ -960,7 +960,7 @@ paths:
                 $ref: "#/components/schemas/inline_response_200"
       security:
       - bearerAuth: []
-      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+      x-openapi-router-controller: swagger_server.controllers.users_admin_controller
   /users/{userId}:
     get:
       tags:
@@ -984,7 +984,7 @@ paths:
                 $ref: "#/components/schemas/UserPublic"
       security:
       - bearerAuth: []
-      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+      x-openapi-router-controller: swagger_server.controllers.users_admin_controller
     patch:
       tags:
       - Users (admin)
@@ -1013,7 +1013,7 @@ paths:
                 $ref: "#/components/schemas/UserPublic"
       security:
       - bearerAuth: []
-      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+      x-openapi-router-controller: swagger_server.controllers.users_admin_controller
   /users/{userId}/roles:
     patch:
       tags:
@@ -1039,7 +1039,7 @@ paths:
           description: Roles actualizados
       security:
       - bearerAuth: []
-      x-openapi-router-controller: swagger_server.controllers.users_(admin)controller
+      x-openapi-router-controller: swagger_server.controllers.users_admin_controller
 components:
   schemas:
     Role:
