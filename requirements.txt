@@ -3,3 +3,10 @@ connexion[swagger-ui] >= 2.6.0
 python_dateutil == 2.6.0
 setuptools >= 21.0.0
 swagger-ui-bundle >= 0.0.2
+bcrypt
+PyJWT
+SQLAlchemy
+alembic
+python-dotenv
+Flask-Cors
+requests
