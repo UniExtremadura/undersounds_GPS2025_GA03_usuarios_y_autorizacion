@@ -1,16 +1,4 @@
-import logging
+"""Test helpers for swagger_server."""
 
-import connexion
-from flask_testing import TestCase
-
-from swagger_server.encoder import JSONEncoder
-
-
-class BaseTestCase(TestCase):
-
-    def create_app(self):
-        logging.getLogger('connexion.operation').setLevel('ERROR')
-        app = connexion.App(__name__, specification_dir='../swagger/')
-        app.app.json_encoder = JSONEncoder
-        app.add_api('swagger.yaml')
-        return app.app
+# The legacy swagger-codegen scaffolding depended on flask_testing. We do not
+# rely on it anymore but keep the module importable for backwards compatibility.
