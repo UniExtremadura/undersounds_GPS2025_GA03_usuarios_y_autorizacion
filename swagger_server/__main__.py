@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import connexion
+import swagger_ui_bundle
 
 try:
     from flask_cors import CORS
@@ -24,7 +25,7 @@ from swagger_server import models_db  # <-- aquí están tus modelos y su Base
 
 def create_app() -> connexion.App:
     settings = get_settings()
-    app = connexion.App(__name__, specification_dir="./swagger/", options={"swagger_ui": True})
+    app = connexion.App(__name__, specification_dir="./swagger/", options={"swagger_ui": True, "swagger_path": swagger_ui_bundle.swagger_ui_path})
     app.app.json_encoder = encoder.JSONEncoder  # aviso deprecado, ok en dev
 
     # Engine + sesión
@@ -50,6 +51,7 @@ def create_app() -> connexion.App:
         pythonic_params=True,
         base_path="/",
     )
+    print("app options")
     return app
 
 
