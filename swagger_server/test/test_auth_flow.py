@@ -39,9 +39,24 @@ def api_server(tmp_path_factory):
 def register_user(api_server):
     payload = {
         "name": "Ana",
+        "username": "Ana",
         "email": "ana@demo.com",
         "password": "Passw0rd!",
-        "role": "artista",
+        "role": "artist",
+    }
+    response = requests.post(f"{api_server}/auth/register", json=payload, timeout=5)
+    assert response.status_code == 201
+    return payload, response.json()
+
+
+@pytest.fixture(scope="module")
+def register_admin(api_server):
+    payload = {
+        "name": "Admin",
+        "username": "Admin",
+        "email": "admin@demo.com",
+        "password": "Adm1nPass!",
+        "role": "admin",
     }
     response = requests.post(f"{api_server}/auth/register", json=payload, timeout=5)
     assert response.status_code == 201
@@ -114,3 +129,31 @@ def test_refresh_and_me_flow(api_server, register_user):
 
     unauthorized = requests.get(f"{api_server}/me", timeout=5)
     assert unauthorized.status_code == 401
+
+
+def test_users_list_requires_admin(api_server, register_user):
+    _, response = register_user
+    access_token = response["tokens"]["access"]
+    result = requests.get(
+        f"{api_server}/users",
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=5,
+    )
+    assert result.status_code == 403
+
+
+def test_users_list_as_admin(api_server, register_user, register_admin):
+    user_payload, _ = register_user
+    _, admin_response = register_admin
+    admin_access = admin_response["tokens"]["access"]
+
+    result = requests.get(
+        f"{api_server}/users",
+        headers={"Authorization": f"Bearer {admin_access}"},
+        timeout=5,
+    )
+    assert result.status_code == 200
+    data = result.json()
+    assert data["total"] >= 2
+    emails = [item["email"] for item in data["items"]]
+    assert user_payload["email"] in emails
