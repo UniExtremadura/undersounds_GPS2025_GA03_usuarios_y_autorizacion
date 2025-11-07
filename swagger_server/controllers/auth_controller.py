@@ -58,8 +58,8 @@ def _parse_json(expected_class, default: dict | None = None):
 def auth_login_post(body):  # noqa: E501
     """Inicia sesión"""
 
-    data = _parse_json(LoginRequest, {})
-    email = _normalize_email(data.get("email"))
+    data = _parse_json(LoginRequest, body)
+    email = _normalize_email(data.get("emailOrUsername"))
     password = data.get("password")
     if not email or not password:
         return {"mensaje": "Email y contraseña son obligatorios"}, 400
@@ -156,6 +156,7 @@ def auth_register_post(body):  # noqa: E501
         "artist": "artista",
         "oyente": "oyente",
         "artista": "artista",
+        "admin": "admin",
     }
     role_mapped = ROLE_MAP.get(role_value_in)
 

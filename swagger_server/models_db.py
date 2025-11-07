@@ -9,6 +9,7 @@ from swagger_server.persistence import Base
 class RoleEnum(str, enum.Enum):
     ARTISTA = "artista"
     OYENTE = "oyente"
+    ADMIN = "admin"
 
 
 class User(Base):
