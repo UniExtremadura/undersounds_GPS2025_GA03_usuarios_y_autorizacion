@@ -11,6 +11,7 @@ tags:
 - name: Auth
 - name: Me
 - name: Users (admin)
+- name: Artists
 paths:
   /me/sessions:
     get:
@@ -854,6 +855,36 @@ paths:
         "204":
           description: Contraseña actualizada
       x-openapi-router-controller: swagger_server.controllers.auth_controller
+  /artists:
+    get:
+      tags:
+        - Artists
+      summary: Listar artistas
+      operationId: artists_get
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: q
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista de artistas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedUsers"
+      x-openapi-router-controller: swagger_server.controllers.artists_controller
+
   /me:
     get:
       tags:
