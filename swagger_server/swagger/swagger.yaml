@@ -992,6 +992,31 @@ paths:
       security:
       - bearerAuth: []
       x-openapi-router-controller: swagger_server.controllers.users_admin_controller
+    post:
+      tags:
+      - Users (admin)
+      summary: Crear un nuevo usuario (solo admin)
+      operationId: users_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "201":
+          description: Usuario creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPublic"
+        "400":
+          description: Datos inválidos
+        "403":
+          description: No autorizado
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.users_admin_controller
   /users/{userId}:
     get:
       tags:
