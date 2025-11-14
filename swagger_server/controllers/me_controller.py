@@ -140,6 +140,23 @@ def me_get(token_info=None):  # noqa: E501
     payload.update({"name": user.name})
     return payload, 200
 
+def me_delete(token_info=None):  # noqa: E501
+    """Borrar la cuenta propia del usuario autenticado"""
+
+    info = token_info or connexion.context.get("token_info", {})
+    if not info or info.get("typ") != "access":
+        return {"mensaje": "No autenticado"}, 401
+
+    session = get_session()
+    user = session.get(User, info.get("user_id"))
+    if not user:
+        return {"mensaje": "Usuario no encontrado"}, 404
+
+    # Borra el usuario
+    session.delete(user)
+    session.commit()
+
+    return {"mensaje": "Cuenta eliminada correctamente"}, 200
 
 def me_password_patch(body):  # noqa: E501
     """Cambia contraseña autenticado

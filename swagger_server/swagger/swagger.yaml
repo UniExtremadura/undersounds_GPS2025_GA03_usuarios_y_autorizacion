@@ -924,6 +924,28 @@ paths:
       security:
       - bearerAuth: []
       x-openapi-router-controller: swagger_server.controllers.me_controller
+    delete:
+      tags:
+      - Me
+      summary: Elimina cuenta propia
+      operationId: me_delete
+      responses:
+        '200':
+          description: Cuenta eliminada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+        '401':
+          description: No autenticado
+        '404':
+          description: Usuario no encontrado
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
   /me/password:
     patch:
       tags:
