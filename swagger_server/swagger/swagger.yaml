@@ -876,6 +876,20 @@ paths:
           in: query
           schema:
             type: string
+        - name: sortBy
+          in: query
+          description: Campo por el que ordenar
+          schema:
+            type: string
+            enum: [name, createdAt]
+            default: name
+        - name: sortOrder
+          in: query
+          description: Dirección de orden
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
       responses:
         "200":
           description: Lista de artistas
