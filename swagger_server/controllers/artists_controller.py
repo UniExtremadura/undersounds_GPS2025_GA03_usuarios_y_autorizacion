@@ -72,12 +72,14 @@ def artists_get(page=None, page_size=None, q=None, sort_by=None, sort_order=None
                 {
                     "id": str(user.id),
                     "name": user.name,
-                    "username": user.name,
+                    # Preferir username explícito si existe, si no caer a name para mantener compatibilidad
+                    "username": user.username or user.name,
                     "email": user.email,
                     "role": user.role.value,
                     "createdAt": created_at,
-                    "avatarUrl": None,
-                    "bio": None,
+                    # Usar valores reales de la tabla en lugar de null para que el frontend muestre la imagen correcta
+                    "avatarUrl": user.avatar_url,
+                    "bio": user.bio,
                 }
             )
 

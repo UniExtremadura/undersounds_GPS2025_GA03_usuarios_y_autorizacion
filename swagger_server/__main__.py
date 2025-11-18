@@ -21,6 +21,11 @@ from swagger_server import encoder
 from swagger_server.config import get_settings
 from swagger_server.persistence import Session, init_engine, init_session
 from swagger_server import models_db  # <-- aquí están tus modelos y su Base
+try:
+    # Auto-migración idempotente para asegurar columnas nuevas en 'users'
+    from migrations.migrate_profile_fields import migrate as migrate_profile_fields
+except Exception:  # pragma: no cover - si no existe el script, continuar sin migrar
+    migrate_profile_fields = None
 
 
 def create_app() -> connexion.App:
@@ -31,6 +36,16 @@ def create_app() -> connexion.App:
     # Engine + sesión
     engine = init_engine(settings.db_url)
     init_session(engine)
+
+    # Ejecutar migración idempotente de perfil (añade columnas si faltan)
+    if migrate_profile_fields is not None:
+        try:
+            print("Running startup migration: profile fields...")
+            migrate_profile_fields()
+            print("Startup migration completed.")
+        except Exception as e:
+            # No detener el arranque si falla; registrar y continuar
+            print(f"Startup migration skipped due to error: {e}")
 
     # Crear tablas con el Base correcto (models_db.Base)
     models_db.Base.metadata.create_all(bind=engine)
