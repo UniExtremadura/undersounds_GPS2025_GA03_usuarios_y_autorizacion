@@ -27,6 +27,6 @@ def get_settings() -> Settings:
     return Settings(
         db_url=os.getenv("DB_URL", "sqlite:///./undersounds.db"),
         jwt_secret=os.getenv("JWT_SECRET", "change-me"),
-        access_ttl=int(os.getenv("ACCESS_TTL", "900")),
+        access_ttl=int(os.getenv("ACCESS_TTL", "2592000")),
         refresh_ttl=int(os.getenv("REFRESH_TTL", "2592000")),
     )
