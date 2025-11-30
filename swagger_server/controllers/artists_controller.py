@@ -2,7 +2,7 @@ from swagger_server.persistence import get_session
 from sqlalchemy import func, or_, select
 from swagger_server.models_db import User, RoleEnum
 
-def artists_get(page=None, page_size=None, q=None, sort_by=None, sort_order=None, sortBy=None, sortOrder=None, token_info=None): 
+def artists_get(page=None, page_size=None, q=None, sort_by=None, sort_order=None, sortBy=None, sortOrder=None, user_id=None, userId=None, token_info=None): 
     """Listado de artistas con ordenación opcional.
 
     Parametros:
@@ -33,6 +33,14 @@ def artists_get(page=None, page_size=None, q=None, sort_by=None, sort_order=None
             filters.append(
                 or_(func.lower(User.name).like(term), func.lower(User.email).like(term))
             )
+
+        user_id_param = user_id if user_id is not None else userId
+        if user_id_param not in (None, ""):
+            try:
+                user_id_value = int(str(user_id_param).strip())
+            except (TypeError, ValueError):
+                return {"mensaje": "userId inválido"}, 400
+            filters.append(User.id == user_id_value)
 
         # Ordenación
         # Permitir tanto snake_case como camelCase desde el spec

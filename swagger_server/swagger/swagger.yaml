@@ -876,6 +876,11 @@ paths:
           in: query
           schema:
             type: string
+        - name: userId
+          in: query
+          description: Filtra por ID exacto del artista
+          schema:
+            type: string
         - name: sortBy
           in: query
           description: Campo por el que ordenar
