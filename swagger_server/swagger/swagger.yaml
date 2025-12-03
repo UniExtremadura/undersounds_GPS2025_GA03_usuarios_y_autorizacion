@@ -1061,7 +1061,7 @@ paths:
   /users/{userId}:
     get:
       tags:
-      - Users (admin)
+      - Users (public)
       summary: Detalle de usuario
       operationId: users_user_id_get
       parameters:
@@ -1079,8 +1079,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserPublic"
-      security:
-      - bearerAuth: []
       x-openapi-router-controller: swagger_server.controllers.users_admin_controller
     patch:
       tags:

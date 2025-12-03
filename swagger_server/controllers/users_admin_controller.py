@@ -268,7 +268,29 @@ def users_user_id_get(user_id):  # noqa: E501
 
     :rtype: UserPublic
     """
-    return 'do some magic!'
+    session = get_session()
+    
+    try:
+        user_id_int = int(user_id)
+    except (TypeError, ValueError):
+        return {"mensaje": "ID de usuario inválido"}, 400
+    
+    user = session.get(User, user_id_int)
+    if not user:
+        return {"mensaje": "Usuario no encontrado"}, 404
+    
+    created_at = user.created_at.isoformat() if user.created_at else None
+    response = {
+        "id": str(user.id),
+        "username": user.username or user.name,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role.value,
+        "createdAt": created_at,
+        "avatarUrl": user.avatar_url,
+        "bio": user.bio,
+    }
+    return response, 200
 
 
 def users_user_id_patch(body, user_id):  # noqa: E501
