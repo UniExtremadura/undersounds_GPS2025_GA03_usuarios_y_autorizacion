@@ -1,6 +1,9 @@
 import connexion
 import six
 
+from swagger_server.models_db import User
+from swagger_server.persistence import get_session
+
 from swagger_server.models.artist_profile import ArtistProfile  # noqa: E501
 from swagger_server.models.artist_profile_update import ArtistProfileUpdate  # noqa: E501
 from swagger_server.models.consents import Consents  # noqa: E501
@@ -121,16 +124,39 @@ def me_follows_user_id_delete(user_id):  # noqa: E501
     return 'do some magic!'
 
 
-def me_get():  # noqa: E501
-    """Perfil del usuario autenticado
+def me_get(token_info=None):  # noqa: E501
+    """Perfil del usuario autenticado"""
 
-     # noqa: E501
+    info = token_info or connexion.context.get("token_info", {})
+    if not info or info.get("typ") != "access":
+        return {"mensaje": "No autenticado"}, 401
 
+    session = get_session()
+    user = session.get(User, info.get("user_id"))
+    if not user:
+        return {"mensaje": "Usuario no encontrado"}, 401
 
-    :rtype: UserPrivate
-    """
-    return 'do some magic!'
+    payload = user.to_private_payload()
+    payload.update({"name": user.name})
+    return payload, 200
 
+def me_delete(token_info=None):  # noqa: E501
+    """Borrar la cuenta propia del usuario autenticado"""
+
+    info = token_info or connexion.context.get("token_info", {})
+    if not info or info.get("typ") != "access":
+        return {"mensaje": "No autenticado"}, 401
+
+    session = get_session()
+    user = session.get(User, info.get("user_id"))
+    if not user:
+        return {"mensaje": "Usuario no encontrado"}, 404
+
+    # Borra el usuario
+    session.delete(user)
+    session.commit()
+
+    return {"mensaje": "Cuenta eliminada correctamente"}, 200
 
 def me_password_patch(body):  # noqa: E501
     """Cambia contraseña autenticado
@@ -147,7 +173,7 @@ def me_password_patch(body):  # noqa: E501
     return 'do some magic!'
 
 
-def me_patch(body):  # noqa: E501
+def me_patch(body, token_info=None):  # noqa: E501
     """Actualiza perfil propio
 
      # noqa: E501
@@ -157,9 +183,43 @@ def me_patch(body):  # noqa: E501
 
     :rtype: UserPrivate
     """
+    info = token_info or connexion.context.get("token_info", {})
+    if not info or info.get("typ") != "access":
+        return {"mensaje": "No autenticado"}, 401
+
+    session = get_session()
+    user = session.get(User, info.get("user_id"))
+    if not user:
+        return {"mensaje": "Usuario no encontrado"}, 404
+
     if connexion.request.is_json:
         body = UserUpdate.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+        
+        # Actualizar campos si están presentes
+        if body.username is not None:
+            # Verificar que el username no esté en uso por otro usuario
+            existing = session.query(User).filter(
+                User.username == body.username,
+                User.id != user.id
+            ).first()
+            if existing:
+                return {"mensaje": "El nombre de usuario ya está en uso"}, 400
+            user.username = body.username
+        
+        if body.avatar_url is not None:
+            user.avatar_url = body.avatar_url
+        
+        if body.bio is not None:
+            user.bio = body.bio
+        
+        session.commit()
+        session.refresh(user)
+        
+        payload = user.to_private_payload()
+        payload.update({"name": user.name})
+        return payload, 200
+    
+    return {"mensaje": "Solicitud inválida"}, 400
 
 
 def me_playlists_get(page=None, page_size=None):  # noqa: E501

@@ -11,6 +11,7 @@ tags:
 - name: Auth
 - name: Me
 - name: Users (admin)
+- name: Artists
 paths:
   /me/sessions:
     get:
@@ -854,6 +855,55 @@ paths:
         "204":
           description: Contraseña actualizada
       x-openapi-router-controller: swagger_server.controllers.auth_controller
+  /artists:
+    get:
+      tags:
+        - Artists
+      summary: Listar artistas
+      operationId: artists_get
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: q
+          in: query
+          schema:
+            type: string
+        - name: userId
+          in: query
+          description: Filtra por ID exacto del artista
+          schema:
+            type: string
+        - name: sortBy
+          in: query
+          description: Campo por el que ordenar
+          schema:
+            type: string
+            enum: [name, createdAt]
+            default: name
+        - name: sortOrder
+          in: query
+          description: Dirección de orden
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: asc
+      responses:
+        "200":
+          description: Lista de artistas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PagedUsers"
+      x-openapi-router-controller: swagger_server.controllers.artists_controller
+
   /me:
     get:
       tags:
@@ -890,6 +940,28 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserPrivate"
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.me_controller
+    delete:
+      tags:
+      - Me
+      summary: Elimina cuenta propia
+      operationId: me_delete
+      responses:
+        '200':
+          description: Cuenta eliminada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensaje:
+                    type: string
+        '401':
+          description: No autenticado
+        '404':
+          description: Usuario no encontrado
       security:
       - bearerAuth: []
       x-openapi-router-controller: swagger_server.controllers.me_controller
@@ -961,10 +1033,35 @@ paths:
       security:
       - bearerAuth: []
       x-openapi-router-controller: swagger_server.controllers.users_admin_controller
+    post:
+      tags:
+      - Users (admin)
+      summary: Crear un nuevo usuario (solo admin)
+      operationId: users_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+        required: true
+      responses:
+        "201":
+          description: Usuario creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserPublic"
+        "400":
+          description: Datos inválidos
+        "403":
+          description: No autorizado
+      security:
+      - bearerAuth: []
+      x-openapi-router-controller: swagger_server.controllers.users_admin_controller
   /users/{userId}:
     get:
       tags:
-      - Users (admin)
+      - Users (public)
       summary: Detalle de usuario
       operationId: users_user_id_get
       parameters:
@@ -982,8 +1079,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserPublic"
-      security:
-      - bearerAuth: []
       x-openapi-router-controller: swagger_server.controllers.users_admin_controller
     patch:
       tags:

@@ -1,4 +1,8 @@
-from connexion.apps.flask_app import FlaskJSONEncoder
+try:
+    from connexion.apps.flask_app import FlaskJSONEncoder
+except ModuleNotFoundError:  # pragma: no cover - Connexion >= 3 compatibility
+    from json import JSONEncoder as FlaskJSONEncoder
+
 import six
 
 from swagger_server.models.base_model_ import Model

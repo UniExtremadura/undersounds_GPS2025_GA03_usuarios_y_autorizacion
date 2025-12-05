@@ -1,5 +1,9 @@
+from __future__ import annotations
+
 import connexion
-import six
+from jwt import InvalidTokenError
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 
 from swagger_server.models.auth_refresh_body import AuthRefreshBody  # noqa: E501
 from swagger_server.models.auth_response import AuthResponse  # noqa: E501
@@ -10,22 +14,63 @@ from swagger_server.models.reset_request_body import ResetRequestBody  # noqa: E
 from swagger_server.models.token_pair import TokenPair  # noqa: E501
 from swagger_server.models.verifyemail_confirm_body import VerifyemailConfirmBody  # noqa: E501
 from swagger_server.models.verifyemail_request_body import VerifyemailRequestBody  # noqa: E501
-from swagger_server import util
+from swagger_server.models_db import RoleEnum, User
+from swagger_server.persistence import get_session
+from swagger_server.security import decode_token, hash_password, issue_tokens, verify_password
+
+
+def _token_payload(tokens: dict) -> dict:
+    return {
+        "access": tokens["access"],
+        "refresh": tokens["refresh"],
+        "accessToken": tokens["access"],
+        "refreshToken": tokens["refresh"],
+    }
+
+
+def _auth_response(user: User, tokens: dict) -> dict:
+    payload = {
+        "user_id": user.id,
+        "name": user.name,
+        "email": user.email,
+        "role": user.role.value,
+        "user": user.to_private_payload(),
+        "tokens": _token_payload(tokens),
+    }
+    return payload
+
+
+def _normalize_email(email: str | None) -> str | None:
+    if email is None:
+        return None
+    return email.strip().lower()
+
+
+def _parse_json(expected_class, default: dict | None = None):
+    if connexion.request.is_json:
+        raw = connexion.request.get_json()
+        if isinstance(raw, dict):
+            return raw
+        return expected_class.from_dict(raw).to_dict()  # pragma: no cover - fallback
+    return default or {}
 
 
 def auth_login_post(body):  # noqa: E501
-    """Inicia sesión
+    """Inicia sesión"""
 
-     # noqa: E501
+    data = _parse_json(LoginRequest, body)
+    email = _normalize_email(data.get("emailOrUsername"))
+    password = data.get("password")
+    if not email or not password:
+        return {"mensaje": "Email y contraseña son obligatorios"}, 400
 
-    :param body: 
-    :type body: dict | bytes
+    session = get_session()
+    user = session.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    if not user or not verify_password(password, user.password_hash):
+        return {"mensaje": "Credenciales inválidas"}, 401
 
-    :rtype: AuthResponse
-    """
-    if connexion.request.is_json:
-        body = LoginRequest.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+    tokens = issue_tokens(user.id)
+    return _auth_response(user, tokens), 200
 
 
 def auth_logout_post():  # noqa: E501
@@ -70,33 +115,92 @@ def auth_password_reset_request_post(body):  # noqa: E501
 
 
 def auth_refresh_post(body):  # noqa: E501
-    """Renueva access token con refresh token
+    """Renueva access token con refresh token"""
 
-     # noqa: E501
+    data = _parse_json(AuthRefreshBody, {})
+    refresh_token = (
+        data.get("refresh")
+        or data.get("refreshToken")
+        or data.get("refresh_token")
+    )
+    if not refresh_token:
+        return {"mensaje": "Refresh token requerido"}, 400
 
-    :param body: 
-    :type body: dict | bytes
+    try:
+        token_data = decode_token(refresh_token, expected_type="refresh")
+    except InvalidTokenError:
+        return {"mensaje": "Token inválido"}, 401
 
-    :rtype: TokenPair
-    """
-    if connexion.request.is_json:
-        body = AuthRefreshBody.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+    session = get_session()
+    user = session.get(User, token_data["user_id"])
+    if not user:
+        return {"mensaje": "Usuario no encontrado"}, 401
+
+    tokens = issue_tokens(user.id)
+    return _token_payload(tokens), 200
 
 
 def auth_register_post(body):  # noqa: E501
-    """Alta de cuenta
+    """Alta de cuenta"""
 
-     # noqa: E501
+    data = _parse_json(RegisterRequest, {})
 
-    :param body: 
-    :type body: dict | bytes
+    name = (data.get("name") or data.get("username") or "").strip()
+    email = _normalize_email(data.get("email"))
+    password = data.get("password")
 
-    :rtype: AuthResponse
-    """
-    if connexion.request.is_json:
-        body = RegisterRequest.from_dict(connexion.request.get_json())  # noqa: E501
-    return 'do some magic!'
+    # Normaliza y mapea el rol entrante (acepta inglés o español)
+    role_value_in = (data.get("role") or "").strip().lower()
+    ROLE_MAP = {
+        "listener": "oyente",
+        "artist": "artista",
+        "oyente": "oyente",
+        "artista": "artista",
+        "admin": "admin",
+    }
+    role_mapped = ROLE_MAP.get(role_value_in)
+
+    # Validaciones
+    if not name or not email or not password or not role_value_in:
+        return {"mensaje": "Todos los campos son obligatorios"}, 400
+
+    if len(password) < 8:
+        return {"mensaje": "La contraseña debe tener al menos 8 caracteres"}, 400
+
+    if role_mapped is None:
+        return {"mensaje": "Rol inválido"}, 400
+
+    # Valida contra tu enum interno
+    try:
+        role = RoleEnum(role_mapped)
+    except ValueError:
+        return {"mensaje": "Rol inválido"}, 400
+
+    # Lógica de creación
+    session = get_session()
+    existing = session.execute(select(User).where(User.email == email)).scalar_one_or_none()
+    if existing:
+        return {"mensaje": "Email ya registrado"}, 400
+
+    user = User(
+        name=name,
+        email=email,
+        password_hash=hash_password(password),
+        role=role,
+    )
+
+    session.add(user)
+    try:
+        session.commit()
+    except IntegrityError:
+        session.rollback()
+        return {"mensaje": "Email ya registrado"}, 400
+
+    session.refresh(user)
+
+    tokens = issue_tokens(user.id)
+    return _auth_response(user, tokens), 201
+
 
 
 def auth_verify_email_confirm_post(body):  # noqa: E501
